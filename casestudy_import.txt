@@ -1,0 +1,17 @@
+MATCH (c:CARICOM_CaseStudy) DETACH DELETE c;
+
+DROP CONSTRAINT CaseStudy IF EXISTS;
+
+CREATE CONSTRAINT CaseStudy IF NOT EXISTS
+FOR (x:CARICOM_CaseStudy)
+REQUIRE x.code IS UNIQUE;
+
+LOAD CSV WITH HEADERS
+FROM 'https://github.com/dynasty2016/CSDGKG-Repo/blob/main/CARICOM%20Case%20Studies%20for%20SDGs.csv?raw=true' AS row
+CALL (row) {
+	MERGE (c:CARICOM_CaseStudy {code: row.code})
+	SET
+	c.description = row.description,
+	c.title = row.title
+} IN TRANSACTIONS OF 25 ROWS;
+
